@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+    <!-- Chats na esquerda -->
+    <div class="sidebar">
+        <h3>Conversas</h3>
+        <div class="conversation">Gonçalo</div>
+        <div class="conversation">Lara</div>
+        <div class="conversation">Isaura</div>
+        <div class="conversation">Grupo Projeto</div>
+        <div class="conversation">Carlos</div>
+    </div>
+    <!-- Chat atual-->
+    <div class="chat">
+        <div class="chat-header">
+            Gonçalo
+        </div>
+        <div class="messages">
+            <div class="message">Olá!</div>
+            <div class="message me">Boas, tudo bem?</div>
+            <div class="message">Tudo 👍</div>
+        </div>
+        <div class="input-area">
+            <input type="text" id="msgInput" placeholder="Escreve uma mensagem...">
+            <button onclick="sendMessage()">Enviar</button>
+        </div>
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
