@@ -27,6 +27,10 @@ body {
     background-color: #40444b;
 }
 
+.conversation.active {
+    background-color: #5865f2;
+}
+
 /* Chat area */
 .chat {
     width: 75%;
@@ -86,4 +90,24 @@ body {
 
 .input-area button:hover {
     background-color: #5b6eae;
+}
+
+.input-area input:disabled {
+    background-color: #c9c9c9;
+    cursor: not-allowed;
+}
+
+.input-area button:disabled {
+    background-color: #a0a0a0;
+    cursor: not-allowed;
+}
+
+.input-area button:disabled:hover {
+    background-color: #a0a0a0;
+}
+
+.no-chat {
+    text-align: center;
+    color: #777;
+    margin-top: 20px;
 }
