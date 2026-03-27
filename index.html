@@ -8,7 +8,7 @@
 </head>
 <body>
 <div class="container">
-    <!-- Chats na esquerda -->
+     <!-- Chat atual-->
     <div class="sidebar">
         <h3>Conversas</h3>
         <div class="conversation">Gonçalo</div>
@@ -16,19 +16,21 @@
         <div class="conversation">Isaura</div>
         <div class="conversation">Grupo Projeto</div>
     </div>
-    <!-- Chat atual-->
+    <!-- Chat -->
     <div class="chat">
-    <div class="chat-header" id="chatHeader">
-        Nenhuma conversa selecionada
+        <div class="chat-header" id="chatHeader">
+            Nenhuma conversa selecionada
+        </div>
+        <div class="messages" id="messages">
+            <p class="no-chat">Seleciona uma conversa para começar</p>
+        </div>
+        <div class="input-area">
+            <button id="attachBtn" onclick="document.getElementById('fileInput').click()" disabled>📎</button>
+            <input type="file" id="fileInput" style="display:none">
+            <input type="text" id="msgInput" placeholder="Escreve uma mensagem..." disabled>
+            <button id="sendBtn" onclick="sendMessage()" disabled>Enviar</button>
+        </div>
     </div>
-    <div class="messages" id="messages">
-        <p class="no-chat">Seleciona uma conversa para começar</p>
-    </div>
-    <div class="input-area">
-        <input type="text" id="msgInput" placeholder="Escreve uma mensagem..." disabled>
-        <button id="sendBtn" onclick="sendMessage()" disabled>Enviar</button>
-    </div>
-</div>
 </div>
 </body>
 </html>
