@@ -27,9 +27,14 @@ function sendMessage() {
     const input = document.getElementById('msgInput');
     const text = input.value.trim();
     if (text === '') return;
-    chats[chatSelecionado].push({ text: text, sender: 'me' });
+    chats[chatSelecionado].push({ text: text, sender: 'me', time: horaAtual() });
     renderMessages();
     input.value = '';
+}
+
+function horaAtual() {
+    const now = new Date();
+    return now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
 }
 
 function renderMessages() {
@@ -43,6 +48,10 @@ function renderMessages() {
     }
 
     mensagens.forEach(msg => {
+        const wrap = document.createElement('div');
+        wrap.classList.add('message-wrap');
+        wrap.classList.add(msg.sender === 'me' ? 'me' : 'other');
+
         const div = document.createElement('div');
         div.classList.add('message');
         if (msg.sender === 'me') div.classList.add('me');
@@ -54,7 +63,13 @@ function renderMessages() {
             div.textContent = msg.text;
         }
 
-        messagesDiv.appendChild(div);
+        const time = document.createElement('span');
+        time.classList.add('msg-timestamp');
+        time.textContent = msg.time || '';
+
+        wrap.appendChild(div);
+        wrap.appendChild(time);
+        messagesDiv.appendChild(wrap);
     });
 
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
@@ -241,7 +256,25 @@ function adicionarGrupoSidebar(nome, membros) {
     lista.appendChild(item);
 }
 
-// Init 
+// Logout 
+
+function fazerLogout() {
+    if (!confirm('Tens a certeza que queres sair?')) return;
+    localStorage.removeItem('userId');
+    localStorage.removeItem('userName');
+    window.location.href = 'login.html';
+}
+
+function carregarUtilizador() {
+    const id   = localStorage.getItem('userId')   || '';
+    const nome = localStorage.getItem('userName') || 'Utilizador';
+
+    document.getElementById('footerNome').textContent = nome;
+    document.getElementById('footerId').textContent   = id;
+    document.getElementById('footerAvatar').textContent = iniciais(nome);
+}
+
+// Init  
 
 document.addEventListener('DOMContentLoaded', function () {
     const input = document.getElementById('msgInput');
@@ -255,7 +288,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!chatSelecionado || !fileInput.files[0]) return;
         const file = fileInput.files[0];
         const url = URL.createObjectURL(file);
-        chats[chatSelecionado].push({ type: 'file', name: file.name, url: url, sender: 'me' });
+        chats[chatSelecionado].push({ type: 'file', name: file.name, url: url, sender: 'me', time: horaAtual() });
         renderMessages();
         fileInput.value = '';
     });
@@ -265,6 +298,8 @@ document.addEventListener('DOMContentLoaded', function () {
             selecionarConversa(conv.dataset.nome, conv, 'chat');
         });
     });
+
+    carregarUtilizador();
 
     document.getElementById('modalOverlay').addEventListener('click', function (e) {
         if (e.target === this) fecharModal();
