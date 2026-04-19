@@ -75,14 +75,14 @@ function renderMessages() {
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
 
-// Header 
+// Header
 
 function atualizarHeader(nome) {
     document.getElementById('chatHeaderNome').textContent = nome;
     document.getElementById('infoBtn').style.display = 'flex';
 }
 
-// Selecionar conversa 
+// Selecionar conversa
 
 function selecionarConversa(nome, elemento, tipo) {
     chatSelecionado = nome;
@@ -128,14 +128,21 @@ function abrirInfoPainel() {
         // Membros
         const membrosDiv = document.getElementById('infoGrupoMembros');
         const membros = g.membros || [];
-        membrosDiv.innerHTML = membros.length > 0
-            ? membros.map(m =>
-                '<div class="membro-item">' +
+        if (membros.length > 0) {
+            membrosDiv.innerHTML = '';
+            membros.forEach(m => {
+                const item = document.createElement('div');
+                item.classList.add('membro-item', 'membro-clicavel');
+                item.innerHTML =
                     '<div class="membro-avatar">' + iniciais(m) + '</div>' +
                     '<span>' + m + '</span>' +
-                '</div>'
-              ).join('')
-            : '<span class="info-vazio">Sem membros</span>';
+                    '<svg class="membro-seta" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>';
+                item.addEventListener('click', () => abrirPerfilMembro(m));
+                membrosDiv.appendChild(item);
+            });
+        } else {
+            membrosDiv.innerHTML = '<span class="info-vazio">Sem membros</span>';
+        }
 
         // Ficheiros
         const ficheirosList = (chats[chatSelecionado] || []).filter(m => m.type === 'file');
@@ -157,6 +164,35 @@ function abrirInfoPainel() {
 function fecharInfoPainel() {
     document.getElementById('infoPainelChat').style.display = 'none';
     document.getElementById('infoPainelGrupo').style.display = 'none';
+}
+
+function abrirPerfilMembro(nome) {
+    const c = contactos[nome] || {};
+
+    document.getElementById('infoAvatar').textContent = iniciais(nome);
+    document.getElementById('infoNome').textContent = nome;
+    document.getElementById('infoEstado').textContent = c.estado || 'Desconhecido';
+    document.getElementById('infoSobre').textContent = c.sobre || '—';
+
+    // Botão de voltar ao grupo
+    const painel = document.getElementById('infoPainelChat');
+    let btnVoltar = painel.querySelector('.btn-voltar-grupo');
+    if (!btnVoltar) {
+        btnVoltar = document.createElement('button');
+        btnVoltar.className = 'btn-voltar-grupo';
+        btnVoltar.innerHTML = '&#8592; Voltar ao grupo';
+        btnVoltar.addEventListener('click', () => {
+            btnVoltar.remove();
+            abrirInfoPainel();
+        });
+        painel.querySelector('.info-painel-inner').insertBefore(
+            btnVoltar,
+            painel.querySelector('.info-avatar')
+        );
+    }
+
+    document.getElementById('infoPainelGrupo').style.display = 'none';
+    painel.style.display = 'flex';
 }
 
 function guardarDescricao() {
@@ -189,7 +225,7 @@ function sairDoGrupo() {
     fecharInfoPainel();
 }
 
-// Grupos 
+// Grupos
 
 function abrirModal() {
     document.getElementById('modalOverlay').style.display = 'flex';
@@ -256,7 +292,40 @@ function adicionarGrupoSidebar(nome, membros) {
     lista.appendChild(item);
 }
 
-// Logout 
+// Pesquisa
+
+function pesquisar(query) {
+    const q = query.toLowerCase().trim();
+    const clearBtn = document.getElementById('searchClear');
+    clearBtn.style.display = q ? 'flex' : 'none';
+
+    // Filtrar conversas diretas
+    document.querySelectorAll('.conversation[data-nome]').forEach(conv => {
+        const nome = conv.dataset.nome.toLowerCase();
+        conv.style.display = nome.includes(q) ? '' : 'none';
+    });
+
+    // Filtrar grupos
+    document.querySelectorAll('.grupo-item').forEach(item => {
+        const nome = (item.dataset.nome || '').toLowerCase();
+        item.style.display = nome.includes(q) ? '' : 'none';
+    });
+
+    // Mostrar/esconder label "Grupos" se não houver resultados
+    const gruposVisiveis = [...document.querySelectorAll('.grupo-item')]
+        .some(i => i.style.display !== 'none');
+    const sectionGrupos = document.querySelector('.sidebar-section');
+    if (sectionGrupos) sectionGrupos.style.display = (!q || gruposVisiveis) ? '' : 'none';
+}
+
+function limparPesquisa() {
+    const input = document.getElementById('searchInput');
+    input.value = '';
+    pesquisar('');
+    input.focus();
+}
+
+// Logout
 
 function fazerLogout() {
     if (!confirm('Tens a certeza que queres sair?')) return;
@@ -274,7 +343,7 @@ function carregarUtilizador() {
     document.getElementById('footerAvatar').textContent = iniciais(nome);
 }
 
-// Init  
+// Init
 
 document.addEventListener('DOMContentLoaded', function () {
     const input = document.getElementById('msgInput');
@@ -303,5 +372,31 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.getElementById('modalOverlay').addEventListener('click', function (e) {
         if (e.target === this) fecharModal();
+    });
+
+    // ESC: fecha painel de info → sai da conversa
+    document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Escape') return;
+
+        const painelChatAberto  = document.getElementById('infoPainelChat').style.display  !== 'none';
+        const painelGrupoAberto = document.getElementById('infoPainelGrupo').style.display !== 'none';
+
+        if (painelChatAberto || painelGrupoAberto) {
+            // 1º ESC: fecha o painel de info, volta à conversa
+            fecharInfoPainel();
+        } else if (chatSelecionado) {
+            // 2º ESC (ou ESC sem painel): sai da conversa
+            chatSelecionado = null;
+            tipoSelecionado = null;
+
+            document.querySelectorAll('.conversation').forEach(c => c.classList.remove('active'));
+            document.getElementById('chatHeaderNome').textContent = 'Nenhuma conversa selecionada';
+            document.getElementById('infoBtn').style.display = 'none';
+            document.getElementById('messages').innerHTML = '<p class="no-chat">Seleciona uma conversa para comecar</p>';
+            document.getElementById('msgInput').disabled = true;
+            document.getElementById('sendBtn').disabled = true;
+            document.getElementById('attachBtn').disabled = true;
+            document.getElementById('msgInput').blur();
+        }
     });
 });
