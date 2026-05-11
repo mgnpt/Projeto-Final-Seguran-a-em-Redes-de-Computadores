@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureChat</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="container">
+    <!-- Chats na esquerda -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h3>Conversas</h3>
+            <button id="newChatBtn" class="btn-icon" title="Nova conversa">+</button>
+        </div>
+        
+        <div id="conversationsList">
+            <!-- Conversas serão inseridas aqui dinamicamente -->
+        </div>
+        
+        <!-- Footer da sidebar com info do user -->
+        <div class="sidebar-footer">
+            <div class="current-user">
+                <div class="user-avatar">
+                    <span id="userInitials">U</span>
+                </div>
+                <div class="user-info">
+                    <div class="user-name" id="userName">Utilizador</div>
+                    <div class="user-id" id="userId">#0000</div>
+                </div>
+                <button id="logoutBtn" class="btn-icon" title="Sair">⏻</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Chat atual -->
+    <div class="chat">
+        <div class="chat-header" id="chatHeader">
+            <div class="header-info">
+                <div class="chat-name">Nenhuma conversa selecionada</div>
+                <div class="chat-status" id="chatStatus"></div>
+            </div>
+        </div>
+        
+        <div class="messages" id="messages">
+            <p class="no-chat">Seleciona uma conversa para começar</p>
+        </div>
+        
+        <div class="input-area">
+            <input type="text" id="msgInput" placeholder="Escreve uma mensagem..." disabled>
+            <button id="sendBtn" onclick="sendMessage()" disabled>Enviar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="js/config.js"></script>
+<script src="js/index.js"></script>
+</body>
+</html>
