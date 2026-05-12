@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - SecureChat</title>
+    <link rel="stylesheet" href="css/login.css">
+</head>
+<body>
+<div class="login-container">
+    <div class="login-box">
+        <div class="login-header">
+            <h1>SecureChat</h1>
+            <p>Sistema de Conversação Segura</p>
+        </div>
+
+        <form id="loginForm" class="login-form">
+            <div class="form-group">
+                <label for="username">Username ou Email</label>
+                <input type="text" id="username" name="username" 
+                       placeholder="tomas ou email@example.com" 
+                       required autocomplete="username">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" 
+                       placeholder="••••••••" 
+                       required autocomplete="current-password">
+            </div>
+
+            <button type="submit" class="btn-login">
+                Entrar
+            </button>
+
+            <div class="login-footer">
+                <p>Ainda não tens conta? <a href="register.html">Regista-te</a></p>
+            </div>
+        </form>
+
+        <div class="demo-info">
+            <p><strong>Modo Demo:</strong> Qualquer username/password funciona</p>
+        </div>
+    </div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/login.js"></script>
+</body>
+</html>

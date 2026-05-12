@@ -8,48 +8,200 @@
 </head>
 <body>
 <div class="container">
-    <!-- Chats na esquerda -->
+         <!-- Sidebar -->
     <div class="sidebar">
-        <div class="sidebar-header">
-            <h3>Conversas</h3>
-            <button id="newChatBtn" class="btn-icon" title="Nova conversa">+</button>
+        <!-- Barra de pesquisa -->
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Pesquisar conversas..." 
+                   oninput="pesquisar(this.value)">
+            <button id="searchClear" class="search-clear" onclick="limparPesquisa()" 
+                    style="display: none;">✕</button>
         </div>
-        
-        <div id="conversationsList">
-            <!-- Conversas serão inseridas aqui dinamicamente -->
+
+        <!-- Botão para criar novo grupo -->
+        <div class="sidebar-actions">
+            <button class="btn-novo-grupo" onclick="abrirModal()">
+                + Criar Grupo
+            </button>
         </div>
-        
-        <!-- Footer da sidebar com info do user -->
+
+        <!-- Lista de conversas -->
+        <div class="sidebar-content">
+            <div id="listaConversas">
+                <!-- Conversas diretas serão inseridas aqui pelo JS -->
+            </div>
+
+            <!-- Seção de grupos -->
+            <div class="sidebar-section">
+                <div class="section-header">Grupos</div>
+                <div id="listaGrupos">
+                    <!-- Grupos serão inseridos aqui pelo JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer da sidebar com info do utilizador -->
         <div class="sidebar-footer">
-            <div class="current-user">
+            <div class="current-user" onclick="abrirPerfilProprio()">
                 <div class="user-avatar">
-                    <span id="userInitials">U</span>
+                    <span id="footerAvatar">U</span>
                 </div>
                 <div class="user-info">
-                    <div class="user-name" id="userName">Utilizador</div>
-                    <div class="user-id" id="userId">#0000</div>
+                    <div class="user-name" id="footerNome">Utilizador</div>
+                    <div class="user-id" id="footerId">#0000</div>
                 </div>
-                <button id="logoutBtn" class="btn-icon" title="Sair">⏻</button>
+                <button class="btn-logout" onclick="fazerLogout()" title="Sair">
+                    ⏻
+                </button>
             </div>
         </div>
     </div>
-    
-    <!-- Chat atual -->
+
+    <!-- Chat area -->
     <div class="chat">
-        <div class="chat-header" id="chatHeader">
-            <div class="header-info">
-                <div class="chat-name">Nenhuma conversa selecionada</div>
-                <div class="chat-status" id="chatStatus"></div>
+        <!-- Header do chat -->
+        <div class="chat-header">
+            <div class="header-left">
+                <div class="chat-name" id="chatHeaderNome">Nenhuma conversa selecionada</div>
+            </div>
+            <div class="header-right">
+                <button id="infoBtn" class="btn-icon-header" 
+                        onclick="abrirInfoPainel()" 
+                        style="display: none;"
+                        title="Informações">
+                    ℹ️
+                </button>
             </div>
         </div>
-        
+
+        <!-- Área de mensagens -->
         <div class="messages" id="messages">
             <p class="no-chat">Seleciona uma conversa para começar</p>
         </div>
-        
+
+        <!-- Input de mensagem -->
         <div class="input-area">
-            <input type="text" id="msgInput" placeholder="Escreve uma mensagem..." disabled>
-            <button id="sendBtn" onclick="sendMessage()" disabled>Enviar</button>
+            <input type="file" id="fileInput" style="display: none;">
+            <button id="attachBtn" class="btn-attach" 
+                    onclick="document.getElementById('fileInput').click()"
+                    disabled
+                    title="Enviar ficheiro">
+                📎
+            </button>
+            <input type="text" id="msgInput" 
+                   placeholder="Escreve uma mensagem..." 
+                   disabled>
+            <button id="sendBtn" onclick="sendMessage()" disabled>
+                Enviar
+            </button>
+        </div>
+    </div>
+
+         <!-- Painel de info - chat direto -->
+    <div id="infoPainelChat" class="info-painel" style="display: none;">
+        <div class="info-painel-inner">
+            <button class="btn-fechar-painel" onclick="fecharInfoPainel()">✕</button>
+            
+            <div class="info-avatar" id="infoAvatar">U</div>
+            <h3 id="infoNome">Nome</h3>
+            <p class="info-estado" id="infoEstado">Estado</p>
+            
+            <div class="info-section">
+                <h4>Sobre</h4>
+                <p id="infoSobre">—</p>
+            </div>
+
+            <div class="info-section" id="infoChatFicheirosSection">
+                <h4>Ficheiros Partilhados</h4>
+                <div id="infoChatFicheirosList">
+                    <span class="info-vazio">Nenhum ficheiro partilhado</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+         <!-- Painel de info - grupo -->
+    <div id="infoPainelGrupo" class="info-painel" style="display: none;">
+        <div class="info-painel-inner">
+            <button class="btn-fechar-painel" onclick="fecharInfoPainel()">✕</button>
+            
+            <h3 id="infoGrupoNome">Nome do Grupo</h3>
+            
+            <div class="info-section">
+                <h4>Descrição</h4>
+                <textarea id="infoGrupoDescricao" 
+                          class="grupo-descricao-input" 
+                          placeholder="Adiciona uma descrição..."></textarea>
+                <button class="btn-guardar-desc" onclick="guardarDescricao()">Guardar</button>
+            </div>
+
+            <div class="info-section">
+                <h4>Membros</h4>
+                <div id="infoGrupoMembros">
+                    <!-- Membros serão inseridos aqui -->
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h4>Ficheiros Partilhados</h4>
+                <div id="infoGrupoFicheiros">
+                    <!-- Ficheiros serão inseridos aqui -->
+                </div>
+            </div>
+
+            <div class="info-section">
+                <button class="btn-sair-grupo" onclick="sairDoGrupo()">
+                    Sair do Grupo
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+     <!-- Modal - criar grupo -->
+<div id="modalOverlay" class="modal-overlay" style="display: none;">
+    <div class="modal">
+        <div class="modal-header">
+            <h3>Criar Novo Grupo</h3>
+            <button class="btn-fechar-modal" onclick="fecharModal()">✕</button>
+        </div>
+        
+        <div class="modal-body">
+            <label class="modal-label">Nome do Grupo</label>
+            <input type="text" id="nomeGrupo" placeholder="Ex: Projeto CA/PI/SRC">
+
+            <label class="modal-label">Selecionar Membros</label>
+            <div id="membrosList" class="membros-list">
+                <label class="membro-checkbox">
+                    <input type="checkbox" value="Goncalo">
+                    <div class="membro-check-avatar">G</div>
+                    <span class="membro-check-nome">Gonçalo</span>
+                    <div class="membro-check-mark">
+                        <svg width="11" height="9" viewBox="0 0 11 9" fill="none"><polyline points="1,4.5 4,7.5 10,1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                </label>
+                <label class="membro-checkbox">
+                    <input type="checkbox" value="Lara">
+                    <div class="membro-check-avatar">L</div>
+                    <span class="membro-check-nome">Lara</span>
+                    <div class="membro-check-mark">
+                        <svg width="11" height="9" viewBox="0 0 11 9" fill="none"><polyline points="1,4.5 4,7.5 10,1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                </label>
+                <label class="membro-checkbox">
+                    <input type="checkbox" value="Isaura">
+                    <div class="membro-check-avatar">I</div>
+                    <span class="membro-check-nome">Isaura</span>
+                    <div class="membro-check-mark">
+                        <svg width="11" height="9" viewBox="0 0 11 9" fill="none"><polyline points="1,4.5 4,7.5 10,1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                </label>
+            </div>
+        </div>
+        
+        <div class="modal-footer">
+            <button class="btn-cancelar" onclick="fecharModal()">Cancelar</button>
+            <button class="btn-criar" onclick="criarGrupo()">Criar Grupo</button>
         </div>
     </div>
 </div>
