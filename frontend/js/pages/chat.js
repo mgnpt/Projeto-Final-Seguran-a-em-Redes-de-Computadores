@@ -28,6 +28,7 @@ let authTokens = {
 // Chat atualmente selecionado
 let chatSelecionado = null;
 let tipoSelecionado = null; // 'chat' ou 'grupo'
+let globalAESKey = null;
 
 // Estrutura de conversas (virá do backend)
 const conversas = new Map(); // Map<uuid, Conversation>
@@ -295,11 +296,18 @@ function atualizarHeader(nome) {
 
 // ENVIO DE MENSAGEM
 
-function sendMessage() {
+async function sendMessage() {
     if (!chatSelecionado) return;
     
     const input = document.getElementById('msgInput');
     const text = input.value.trim();
+    
+    const encryptedData = await encryptMessage(
+        text,
+        globalAESKey
+    );
+    console.log("Mensagem original:", text);
+    console.log("Mensagem cifrada:", encryptedData);
     
     if (text === '') return;
     
@@ -325,8 +333,8 @@ function sendMessage() {
         conversation_id: conversationUuid,
         sender_id: currentUser.uuid,
         // Quando tiveres crypto, estes campos serão preenchidos:
-        ciphertext: null,
-        iv: null,
+        ciphertext: encryptedData.ciphertext,
+        iv: encryptedData.iv,
         signature: null,
         content_hash: null,
         message_type: 'text',
@@ -335,7 +343,7 @@ function sendMessage() {
         edited_at: null,
         deleted_at: null,
         // Dados locais
-        text: text,
+        encryptedData: encryptedData,
         sender: 'me',
         time: horaAtual()
     };
@@ -359,13 +367,13 @@ function sendMessage() {
     
     // TODO: Quando tiveres backend, enviar para API
     console.log('Mensagem a enviar para o backend:', {
-        conversation_uuid: conversationUuid,
-        message_type: 'text',
-        ciphertext: '[texto cifrado aqui]',
-        iv: '[IV aqui]',
-        signature: '[assinatura aqui]',
-        content_hash: '[hash aqui]'
-    });
+    conversation_uuid: conversationUuid,
+    message_type: 'text',
+    ciphertext: encryptedData.ciphertext,
+    iv: encryptedData.iv,
+    signature: null,
+    content_hash: null
+});
 }
 
 // RENDERIZAÇÃO DE MENSAGENS
@@ -406,7 +414,24 @@ function renderMessages() {
             div.classList.add('file');
             div.innerHTML = '<span class="file-icon">📄</span> <a href="' + msg.url + '" download="' + msg.name + '">' + msg.name + '</a>';
         } else {
-            div.textContent = msg.text;
+            if (msg.ciphertext && msg.iv && globalAESKey) {
+
+                decryptMessage(
+                  msg.ciphertext,
+                  msg.iv,
+                  globalAESKey
+                )
+                .then(decrypted => {
+                  div.textContent = decrypted;
+                })
+                .catch(() => {
+                    div.textContent = "[Erro ao decifrar]";
+                });
+
+            } else {
+
+                div.textContent = msg.text || "[Mensagem inválida]";
+            }
         }
         
         const time = document.createElement('span');
@@ -865,6 +890,10 @@ document.addEventListener('DOMContentLoaded', function () {
     
     // ESC: fecha painel de info → sai da conversa
     document.addEventListener('keydown', function (e) {
+        generateAESKey().then(key => {
+        globalAESKey = key;
+        console.log("AES global inicializada");
+    });
         if (e.key !== 'Escape') return;
         
         const painelChat = document.getElementById('infoPainelChat');
@@ -909,3 +938,65 @@ window.debugApp = {
     chatSelecionado,
     tipoSelecionado
 };
+import {
+    generateAESKey,
+    encryptMessage,
+    decryptMessage
+} from '../crypto/aes.js';
+
+import {
+    generateKeyPair,
+    encryptAESKey,
+    decryptAESKey
+} from '../crypto/rsa.js';
+
+async function testE2EE() {
+
+    console.log("=== TESTE E2EE ===");
+
+    // GERAR CHAVES RSA
+    console.log("A gerar chaves RSA...");
+    const rsaKeys = await generateKeyPair();
+
+    // GERAR CHAVE AES
+    console.log("A gerar chave AES...");
+    const aesKey = await generateAESKey();
+
+    // CIFRAR MENSAGEM COM AES
+    const encryptedMessage = await encryptMessage(
+        "Mensagem ultra secreta",
+        aesKey
+    );
+
+    console.log("Mensagem cifrada:");
+    console.log(encryptedMessage);
+
+    // CIFRAR CHAVE AES COM RSA
+    const encryptedAESKey = await encryptAESKey(
+        aesKey,
+        rsaKeys.publicKey
+    );
+
+    console.log("Chave AES cifrada com RSA:");
+    console.log(encryptedAESKey);
+
+    // RECUPERAR CHAVE AES
+    const recoveredAESKey = await decryptAESKey(
+        encryptedAESKey,
+        rsaKeys.privateKey
+    );
+
+    console.log("Chave AES recuperada!");
+
+    // DECIFRAR MENSAGEM
+    const decryptedMessage = await decryptMessage(
+        encryptedMessage.ciphertext,
+        encryptedMessage.iv,
+        recoveredAESKey
+    );
+
+    console.log("Mensagem decifrada:");
+    console.log(decryptedMessage);
+}
+
+testE2EE();
